@@ -177,13 +177,12 @@ void calculate_function_onmany(cublasHandle_t handle, ff_network* network, int n
     for(i=0; i<number_of_inputs; i++)
     {
         cudaStat = cudaMemcpy(&(tmp_vec[i*maxdim]), &(dev_input[i*network->dimension_of_layer[0]]), network->dimension_of_layer[0]*sizeof(float), cudaMemcpyDeviceToDevice);
-    }
-    if (cudaStat != cudaSuccess) 
-    {
+        if (cudaStat != cudaSuccess) 
+        {
         printf ("Input konnte in der Grafikkarte nicht hin und her kopiert werden.");
+        }
     }
-
-
+    
     float* ausgabe = (float*) malloc(sizeof(float)*number_of_inputs*maxdim);
     float alpha = 1.0f;
 	float beta = 0.0f;
@@ -210,6 +209,10 @@ void calculate_function_onmany(cublasHandle_t handle, ff_network* network, int n
     for(i=0; i<number_of_inputs; i++)
     {
         cudaStat = cudaMemcpy(&(output[i*dim_lastlayer]), &(tmp_vec[i*maxdim]), dim_lastlayer*sizeof(float), cudaMemcpyDeviceToHost);
+        if (cudaStat != cudaSuccess) 
+        {
+            printf ("Input konnte in der Grafikkarte nicht hin und her kopiert werden.");
+        }
     }
     cudaFree(tmp_vec);
     cudaFree(tmp_vec2);
@@ -374,7 +377,7 @@ void shuffle_training_data(training_data* tdata, int input_dimension, int output
 	float* dev_output;
 
 	cudaMalloc((void**) &dev_input, input_dimension * sizeof(float));
-  cudaMalloc((void**) &dev_output, output_dimension * sizeof(float));
+    cudaMalloc((void**) &dev_output, output_dimension * sizeof(float));
 
 	for(i = 0; i < input_size; i++)
 	{
