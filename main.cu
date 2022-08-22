@@ -4,7 +4,6 @@
     Include
     ======= */
 
-
 /* Standard Bibliotheken */
 #include <ctype.h>
 #include <stdio.h>
@@ -22,7 +21,6 @@
     ================= */
 int THREADS = 32;
 int BLOCKS = 32;
-
 
 /*  ==========
     Strukturen 
@@ -53,6 +51,7 @@ typedef struct {
 /*  ================================================
     Elementweise Funktionen und Cuda Hilfsfunktionen
     ================================================ */
+
 __global__
 void apply_g_elementwise(int n, float* x, float* y)
 {
@@ -64,6 +63,7 @@ void apply_g_elementwise(int n, float* x, float* y)
          y[i] = 1 / (1 + exp(-x[i]));
       }
 }
+
 __global__
 void product_elementwise(int n, float* x, float* y)
 {
@@ -75,6 +75,7 @@ void product_elementwise(int n, float* x, float* y)
           y[i] = y[i]*x[i];
       }   
 }
+
 __global__
 void apply_h_elementwise(int n, float* x, float* y)
 {
@@ -90,6 +91,7 @@ void apply_h_elementwise(int n, float* x, float* y)
 /*  ===========================
     Funktionen fuers ff_network
     =========================== */
+
 ff_network* create_and_init(int number_of_layers, int* dimensions)
 {
     /*Jeder Pointer kriegt einen Speicherplatz, auf den er zeigt */
@@ -216,6 +218,7 @@ void calculate_function_onmany(cublasHandle_t handle, ff_network* network, int n
 /*  =======================
     Funktionen fuer Trainer
     ======================= */
+
 trainer* initialize_trainer(int package_size, ff_network* network, float** adj_matrix)
 {
     int i; // Schleifencounter
@@ -252,6 +255,7 @@ trainer* initialize_trainer(int package_size, ff_network* network, float** adj_m
 /*  =========================
     Funktionen fuers Training
     ========================= */
+
 void adjust_weights(cublasHandle_t handle, training_data* tdata, trainer* ts, float learning_rate)
 {
     float neg_alpha = -1.0f;
@@ -401,6 +405,7 @@ void shuffle_training_data(training_data* tdata, int input_dimension, int output
 /*  ==================================================
     Funktionen um Daten in eine Textdatei zu schreiben
     ================================================== */
+
 void save_output_to_file(const char *filename, float* output, int outputdimension, int number_of_outputs)
 {
     FILE* file = fopen(filename, "w");
@@ -447,9 +452,11 @@ void save_network_to_file(ff_network* network, const char* filename)
     }
     fclose(file);
 }
+
 /*  ==========================================
     Funktionen fuer Daten aus einem File lesen
     ========================================== */
+
 void load_input_from_file_to_dev(const char* filename, float** input, int* number)
 {
     FILE* file = fopen(filename, "r");
@@ -568,7 +575,6 @@ training_data* load_training_data_from_file(const char* filename)
         
     }
     
-
     training_data* tdata = (training_data*) malloc(sizeof(training_data));
     tdata->number_of_inputs = number_of_inputs;
 
@@ -593,6 +599,7 @@ training_data* load_training_data_from_file(const char* filename)
 /*  =====================================
     Funktionen fuer CommandLine-Usibility
     ===================================== */
+
 void print_help()
 {
     printf("HILFE\n*****\n\nPARAMETER\t\t\t BESCHREIBUNG\n\t-a\t\t (A)ufteilung der Cuda Kerne z.B. -a 32x64 entspricht 32 Bloecke auf 64 Threads.\n\n\t-c\t\t (C)alculieren. Gibt an, ob das Netzwerk am Ende eine Berechnung durchfuehren soll.\n\n\t-d\t\t (D)aten. Gibt den Pfad an, wo die Datendatei hinterlegt ist z.B -d Netzwerk/datenfile.txt.\n\n\t-h\t\t (H)ilfe. Zeigt diese Hilfe an :D.\n\n\t-i\t\t (I)nput. Gibt den Pfad an, wo die Inputdatei hinterlegt ist z.B -d Netzwerk/input.txt.\n\n\t-j\t\t Ad(j)acency. Gibt den Pfad an, wo die Adjacency-Matrix hinterlegt ist z.B -j Netzwerk/adjacecy.txt.\n\n\t-l\t\t (L)ernen. Gibt an, ob das Netzwerk trainiert werden soll.\n\n\t-n\t\t (N)etzwerk. Gibt den Pfad an, wo das Netzwerk hinterlegt ist z.B -d Netzwerk/netzwerk.txt.\n\n\t-o\t\t (O)utput. Gibt den Pfad an, wo die Outputdatei hinterlegt ist z.B -d Netzwerk/output.txt.\n\n\t-p\t\t (P)ackage-Size. Hier kann die Paketgroesse geaendert werden z.B. -p 100.\n\n\t-s\t\t (S)peichern. Gibt den Pfad an, wo das Netzwerk gespeichert werden soll z.B -d Netzwerk/save.txt.\n\n\t-t\t\t (T)rainer. Hier kann man den Trainer einstellen z.B -t ANZAHLPAKETExWIEDERHOLUNGxLERNRATE.\n\n\t-v\t\t (V)erbose. Gibt Zwischenschritte in der Console aus.\n\n\n\n");
@@ -665,18 +672,20 @@ int getopt(int nargc, char* const nargv[], const char* ostr)
     }
     return (optopt);                        /* dump back option letter */
 }
+
 /*  =============
     Main-Funktion
     ============= */
+
 int main(int argc, char **argv)
 {	
     int c; // Variable fuer Getopt abzuarbeiten.
 	char a_value[50]; //Opt: -a Blocks x Threads
 	char* a_number_of_blocks;
 	char* a_number_of_threads;
-    const char* output_file = "Netzwerk/output.txt"; //Opt: -o Outputfile
-    const char* network_file = "Netzwerk/network.txt"; // Opt: -n Netzwerk, dass geladen werden soll
-    const char* input_file = "Netzwerk/input.txt"; //Opt -i inputfile
+    const char* output_file = "netzwerk/output.txt"; //Opt: -o Outputfile
+    const char* network_file = "netzwerk/network.txt"; // Opt: -n Netzwerk, dass geladen werden soll
+    const char* input_file = "netzwerk/input.txt"; //Opt -i inputfile
     int help_call = 0;
     const char* trainingsdata_file = "Netzwerk/trainingsdata.txt"; //Opt: -d Trainingsdatenfile
     int s_value = 0; //Opt: -s  Boolean if Network should be saved.
